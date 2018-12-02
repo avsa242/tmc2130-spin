@@ -60,9 +60,21 @@ PUB Interpolate(enabled) | tmp
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_INTPOL
         OTHER:
-            return tmc_rdDataGram((core#REG_CHOPCONF >> core#FLD_INTPOL) & 1) * TRUE
+            return (tmc_rdDataGram(core#REG_CHOPCONF) >> core#FLD_INTPOL & 1) * TRUE
     tmp := tmc_rdDataGram (core#REG_CHOPCONF) & core#FLD_INTPOL_MASK
     tmp |= enabled
+    tmc_wrDataGram (core#REG_CHOPCONF, tmp)
+
+PUB Microsteps(resolution) | tmp
+
+    case resolution
+        1, 2, 4, 8, 16, 32, 64, 128:
+            resolution := lookdown(resolution: 1, 2, 4, 8, 16, 32, 64, 128) << core#FLD_MRES
+        OTHER:
+            return (tmc_rdDataGram(core#REG_CHOPCONF) >> core#FLD_MRES) & core#FLD_MRES_BITS
+
+    tmp := tmc_rdDataGram (core#REG_CHOPCONF) & core#FLD_MRES_MASK
+    tmp |= resolution
     tmc_wrDataGram (core#REG_CHOPCONF, tmp)
 
 PUB ShortProtect(enabled) | tmp

@@ -46,9 +46,14 @@ CON
     REG_MSCURACT            = $6B
     REG_CHOPCONF            = $6C
         FLD_DISS2G          = 30
-        FLD_DISS2G_MASK     = ($FF_FF_FF_FF - (1 << FLD_DISS2G))
+        FLD_DISS2G_BITS     = %1
+        FLD_DISS2G_MASK     = ($FF_FF_FF_FF - (FLD_DISS2G_BITS << FLD_DISS2G))
         FLD_INTPOL          = 28
-        FLD_INTPOL_MASK     = ($FF_FF_FF_FF - (1 << FLD_INTPOL))
+        FLD_INTPOL_BITS     = %1
+        FLD_INTPOL_MASK     = ($FF_FF_FF_FF - (FLD_INTPOL_BITS << FLD_INTPOL))
+        FLD_MRES            = 24
+        FLD_MRES_BITS       = %1111
+        FLD_MRES_MASK       = ($FF_FF_FF_FF - (FLD_MRES_BITS << FLD_INTPOL))
     REG_COOLCONF            = $6D
     REG_DCCTRL              = $6E
     REG_DRV_STATUS          = $6F
