@@ -27,37 +27,53 @@ VAR
 PUB Main
 
     Setup
-
-    tmc.ShortProtect (TRUE)
-    ser.Position (0, 5)
-    repeat
-{        ser.Position (0, 5)
+        ser.Position (0, 3)
         ser.Str (string("Chip version: "))
         ser.Hex (tmc.ChipVersion, 2)
 
-        ser.Position (0, 6)
+        ser.Position (0, 4)
         ser.Str (string("Status: "))
         ser.Bin (tmc.Status, 3)
 
-        ser.Position (0, 7)
+        ser.Position (0, 5)
         ser.Str (string("SPI Mode: "))
         ser.Hex (tmc.SPIMode, 8)
-}
-        tmc.Interpolate (TRUE)
-        ser.Position (0, 8)
-        ser.Str (string("Chopper/driver cfg: "))
-        ser.bin (tmc.ChopConf, 32)
-
-        time.Sleep (1)
-
-        tmc.Interpolate (FALSE)
-        ser.Position (0, 8)
-        ser.Str (string("Chopper/driver cfg: "))
-        ser.bin (tmc.ChopConf, 32)
-
-        time.Sleep (1)
 
     repeat
+        GCONF
+'        ChopperCfg
+
+PUB GCONF
+
+    tmc.InvertShaftDir (FALSE)
+    ser.Position (0, 7)
+    ser.Str (string("GCONF: "))
+    ser.Bin (tmc.GCONF, 32)
+    time.Sleep (1)
+
+    tmc.InvertShaftDir (TRUE)
+    ser.Position (0, 7)
+    ser.Str (string("GCONF: "))
+    ser.Bin (tmc.GCONF, 32)
+    time.Sleep (1)
+
+PUB ChopperCfg
+
+    tmc.ShortProtect (TRUE)
+
+    tmc.Interpolate (TRUE)
+    ser.Position (0, 8)
+    ser.Str (string("Chopper/driver cfg: "))
+    ser.bin (tmc.ChopConf, 32)
+
+    time.Sleep (1)
+
+    tmc.Interpolate (FALSE)
+    ser.Position (0, 8)
+    ser.Str (string("Chopper/driver cfg: "))
+    ser.bin (tmc.ChopConf, 32)
+
+    time.Sleep (1)
 
 {
  X.begin(); // Init

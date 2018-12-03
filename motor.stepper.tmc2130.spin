@@ -54,6 +54,10 @@ PUB ChipVersion | tmp
 PUB ChopConf
 
     result := tmc_rdDataGram (core#REG_CHOPCONF) & $FF_FF_FF_FF
+
+PUB GCONF
+
+    result := tmc_rdDataGram (core#REG_GCONF) & $FF_FF_FF_FF
     
 PUB Interpolate(enabled) | tmp
 ' Dis/Enable interpolation to 256 microsteps
@@ -62,10 +66,22 @@ PUB Interpolate(enabled) | tmp
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_INTPOL
         OTHER:
-            return (tmc_rdDataGram(core#REG_CHOPCONF) >> core#FLD_INTPOL & 1) * TRUE
+            return (tmc_rdDataGram(core#REG_CHOPCONF) >> core#FLD_INTPOL & core#FLD_INTPOL_BITS) * TRUE
     tmp := tmc_rdDataGram (core#REG_CHOPCONF) & core#FLD_INTPOL_MASK
     tmp |= enabled
     tmc_wrDataGram (core#REG_CHOPCONF, tmp)
+
+PUB InvertShaftDir(enabled) | tmp
+' Invert motor direction
+'   Valid values are TRUE, 1 or FALSE
+'   Any other value polls the chip and returns the current setting
+    case ||enabled
+        0, 1: enabled := ||enabled << core#FLD_SHAFT
+        OTHER:
+            return (tmc_rdDataGram(core#REG_GCONF) >> core#FLD_SHAFT & core#FLD_SHAFT_BITS) * TRUE
+    tmp := tmc_rdDataGram (core#REG_GCONF) & core#FLD_SHAFT_MASK
+    tmp |= enabled
+    tmc_wrDataGram (core#REG_GCONF, tmp)
 
 PUB Microsteps(resolution) | tmp
 ' Set micro-step resolution
@@ -89,7 +105,7 @@ PUB ShortProtect(enabled) | tmp
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_DISS2G
         OTHER:
-            return tmc_rdDataGram((core#REG_CHOPCONF >> core#FLD_DISS2G) & 1) * TRUE
+            return tmc_rdDataGram((core#REG_CHOPCONF >> core#FLD_DISS2G) & core#FLD_DISS2G_BITS) * TRUE
     tmp := tmc_rdDataGram (core#REG_CHOPCONF) & core#FLD_DISS2G_MASK
     tmp |= enabled
     tmc_wrDataGram (core#REG_CHOPCONF, tmp)

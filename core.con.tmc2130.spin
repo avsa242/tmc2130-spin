@@ -11,25 +11,28 @@
 
 CON
 
-    CPOL            = 1
-    CPHS            = 2
-    CLKDELAY        = 1
+    CPOL                    = 1
+    CPHS                    = 2
+    CLKDELAY                = 1
 '' Register definitions
-    REG_GCONF       = $00
-    REG_GSTAT       = $01
-    REG_IOIN        = $04
-    REG_IHOLD_IRUN  = $10
-    REG_TPOWERDOWN  = $11
-    REG_TSTEP       = $12
-    REG_TPWMTHRS    = $13
-    REG_TCOOLTHRS   = $14
-    REG_THIGH       = $15
+    REG_GCONF               = $00
+        FLD_SHAFT           = 4
+        FLD_SHAFT_BITS      = %1
+        FLD_SHAFT_MASK      = ($FF_FF_FF_FF - (FLD_SHAFT_BITS << FLD_SHAFT))
+    REG_GSTAT               = $01
+    REG_IOIN                = $04
+    REG_IHOLD_IRUN          = $10
+    REG_TPOWERDOWN          = $11
+    REG_TSTEP               = $12
+    REG_TPWMTHRS            = $13
+    REG_TCOOLTHRS           = $14
+    REG_THIGH               = $15
 
 '' SPI MODE
-    REG_XDIRECT     = $2D
+    REG_XDIRECT             = $2D
 
 '' dcStep MIN VELOCITY REG    
-    REG_VDCMIN      = $33
+    REG_VDCMIN              = $33
 
 '' MOTOR DRIVER REGISTERS
     REG_MSLUT               = $60
