@@ -56,7 +56,9 @@ PUB ChopConf
     result := tmc_rdDataGram (core#REG_CHOPCONF) & $FF_FF_FF_FF
     
 PUB Interpolate(enabled) | tmp
-
+' Dis/Enable interpolation to 256 microsteps
+'   Valid values are TRUE, 1 or FALSE
+'   Any other value polls the chip and returns the current setting
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_INTPOL
         OTHER:
@@ -66,12 +68,15 @@ PUB Interpolate(enabled) | tmp
     tmc_wrDataGram (core#REG_CHOPCONF, tmp)
 
 PUB Microsteps(resolution) | tmp
-
+' Set micro-step resolution
+'   Valid values are 1, 2, 4, 8, 16, 32, 64, 128 or 256 (power-on default)
+'   Any other value polls the chip and returns the current setting
     case resolution
-        1, 2, 4, 8, 16, 32, 64, 128:
-            resolution := lookdown(resolution: 1, 2, 4, 8, 16, 32, 64, 128) << core#FLD_MRES
+        1, 2, 4, 8, 16, 32, 64, 128, 256:
+            resolution := lookdownz(resolution: 256, 1, 2, 4, 8, 16, 32, 64, 128) << core#FLD_MRES
         OTHER:
-            return (tmc_rdDataGram(core#REG_CHOPCONF) >> core#FLD_MRES) & core#FLD_MRES_BITS
+            result := (tmc_rdDataGram(core#REG_CHOPCONF) >> core#FLD_MRES) & core#FLD_MRES_BITS
+            return result := lookupz(result: 256, 1, 2, 4, 8, 16, 32, 64, 128)
 
     tmp := tmc_rdDataGram (core#REG_CHOPCONF) & core#FLD_MRES_MASK
     tmp |= resolution

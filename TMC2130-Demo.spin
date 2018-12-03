@@ -29,6 +29,7 @@ PUB Main
     Setup
 
     tmc.ShortProtect (TRUE)
+    ser.Position (0, 5)
     repeat
 {        ser.Position (0, 5)
         ser.Str (string("Chip version: "))
@@ -45,14 +46,14 @@ PUB Main
         tmc.Interpolate (TRUE)
         ser.Position (0, 8)
         ser.Str (string("Chopper/driver cfg: "))
-        ser.Hex ( tmc.ChopConf, 8)
+        ser.bin (tmc.ChopConf, 32)
 
         time.Sleep (1)
 
         tmc.Interpolate (FALSE)
         ser.Position (0, 8)
         ser.Str (string("Chopper/driver cfg: "))
-        ser.Hex ( tmc.ChopConf, 8)
+        ser.bin (tmc.ChopConf, 32)
 
         time.Sleep (1)
 

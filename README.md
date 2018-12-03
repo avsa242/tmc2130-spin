@@ -14,6 +14,6 @@ This is a P8X32A/Propeller driver object for the Trinamic TMC2130 Stepper Motor 
 
 ## TODO
 
-[ ] Implement bare minimum to match configuration used by Marco Reps as used in his Elekslaser A3 laser engraver.
-[ ] Once implemented, begin implementing (some? all?) remaining chip features
+- [ ] Implement bare minimum to match configuration used by Marco Reps as used in his Elekslaser A3 laser engraver.
+- [ ] Once implemented, begin implementing (some? all?) remaining chip features
 
