@@ -11,68 +11,72 @@
 
 CON
 
-    CPOL                    = 1
-    CPHS                    = 2
-    CLKDELAY                = 1
+    CPOL                        = 1
+    CPHS                        = 2
+    CLKDELAY                    = 1
 '' Register definitions
-    REG_GCONF               = $00
-        FLD_DIAG1_STALL     = 8
-        FLD_DIAG1_STALL_BITS= %1
-        FLD_DIAG1_STALL_MASK= ($FF_FF_FF_FF - (FLD_DIAG1_STALL_BITS << FLD_DIAG1_STALL))
+    REG_GCONF                   = $00
+        FLD_DIAG1_PUSHPULL      = 13
+        FLD_DIAG1_PUSHPULL_BITS = %1
+        FLD_DIAG1_PUSHPULL_MASK = ($FF_FF_FF_FF - (FLD_DIAG1_PUSHPULL_BITS << FLD_DIAG1_PUSHPULL))
 
-        FLD_DIAG0_STALL     = 7
-        FLD_DIAG0_STALL_BITS= %1
-        FLD_DIAG0_STALL_MASK= ($FF_FF_FF_FF - (FLD_DIAG0_STALL_BITS << FLD_DIAG0_STALL))
+        FLD_DIAG1_STALL         = 8
+        FLD_DIAG1_STALL_BITS    = %1
+        FLD_DIAG1_STALL_MASK    = ($FF_FF_FF_FF - (FLD_DIAG1_STALL_BITS << FLD_DIAG1_STALL))
 
-        FLD_SHAFT           = 4
-        FLD_SHAFT_BITS      = %1
-        FLD_SHAFT_MASK      = ($FF_FF_FF_FF - (FLD_SHAFT_BITS << FLD_SHAFT))
-    REG_GSTAT               = $01
-    REG_IOIN                = $04
-    REG_IHOLD_IRUN          = $10
-    REG_TPOWERDOWN          = $11
-    REG_TSTEP               = $12
-    REG_TPWMTHRS            = $13
-    REG_TCOOLTHRS           = $14
-        REG_TCOOLTHRS_BITS  = %1111_1111_1111_1111_1111
-    REG_THIGH               = $15
+        FLD_DIAG0_STALL         = 7
+        FLD_DIAG0_STALL_BITS    = %1
+        FLD_DIAG0_STALL_MASK    = ($FF_FF_FF_FF - (FLD_DIAG0_STALL_BITS << FLD_DIAG0_STALL))
+
+        FLD_SHAFT               = 4
+        FLD_SHAFT_BITS          = %1
+        FLD_SHAFT_MASK          = ($FF_FF_FF_FF - (FLD_SHAFT_BITS << FLD_SHAFT))
+    REG_GSTAT                   = $01
+    REG_IOIN                    = $04
+    REG_IHOLD_IRUN              = $10
+    REG_TPOWERDOWN              = $11
+    REG_TSTEP                   = $12
+    REG_TPWMTHRS                = $13
+    REG_TCOOLTHRS               = $14
+        REG_TCOOLTHRS_BITS      = %1111_1111_1111_1111_1111
+    REG_THIGH                   = $15
 
 '' SPI MODE
-    REG_XDIRECT             = $2D
+    REG_XDIRECT                 = $2D
 
 '' dcStep MIN VELOCITY REG    
-    REG_VDCMIN              = $33
+    REG_VDCMIN                  = $33
 
 '' MOTOR DRIVER REGISTERS
-    REG_MSLUT               = $60
-    REG_MSLUT1              = $61
-    REG_MSLUT2              = $62
-    REG_MSLUT3              = $63
-    REG_MSLUT4              = $64
-    REG_MSLUT5              = $65
-    REG_MSLUT6              = $66
-    REG_MSLUT7              = $67
-    REG_MSLUTSEL            = $68
-    REG_MSLUTSTART          = $69
-    REG_MSCNT               = $6A
-    REG_MSCURACT            = $6B
-    REG_CHOPCONF            = $6C
-        FLD_DISS2G          = 30
-        FLD_DISS2G_BITS     = %1
-        FLD_DISS2G_MASK     = ($FF_FF_FF_FF - (FLD_DISS2G_BITS << FLD_DISS2G))
-        FLD_INTPOL          = 28
-        FLD_INTPOL_BITS     = %1
-        FLD_INTPOL_MASK     = ($FF_FF_FF_FF - (FLD_INTPOL_BITS << FLD_INTPOL))
-        FLD_MRES            = 24
-        FLD_MRES_BITS       = %1111
-        FLD_MRES_MASK       = ($FF_FF_FF_FF - (FLD_MRES_BITS << FLD_MRES))
-    REG_COOLCONF            = $6D
-    REG_DCCTRL              = $6E
-    REG_DRV_STATUS          = $6F
-    REG_PWMCONF             = $70
-    REG_PWM_SCALE           = $71
-    REG_ENCM_CTRL           = $72
-    REG_LOST_STEPS          = $73
+    REG_MSLUT                   = $60
+    REG_MSLUT1                  = $61
+    REG_MSLUT2                  = $62
+    REG_MSLUT3                  = $63
+    REG_MSLUT4                  = $64
+    REG_MSLUT5                  = $65
+    REG_MSLUT6                  = $66
+    REG_MSLUT7                  = $67
+    REG_MSLUTSEL                = $68
+    REG_MSLUTSTART              = $69
+    REG_MSCNT                   = $6A
+    REG_MSCURACT                = $6B
+    REG_CHOPCONF                = $6C
+        FLD_DISS2G              = 30
+        FLD_DISS2G_BITS         = %1
+        FLD_DISS2G_MASK         = ($FF_FF_FF_FF - (FLD_DISS2G_BITS << FLD_DISS2G))
+        FLD_INTPOL              = 28
+        FLD_INTPOL_BITS         = %1
+        FLD_INTPOL_MASK         = ($FF_FF_FF_FF - (FLD_INTPOL_BITS << FLD_INTPOL))
+        FLD_MRES                = 24
+        FLD_MRES_BITS           = %1111
+        FLD_MRES_MASK           = ($FF_FF_FF_FF - (FLD_MRES_BITS << FLD_MRES))
+    REG_COOLCONF                = $6D
+    REG_DCCTRL                  = $6E
+    REG_DRV_STATUS              = $6F
+    REG_PWMCONF                 = $70
+    REG_PWM_SCALE               = $71
+    REG_ENCM_CTRL               = $72
+    REG_LOST_STEPS              = $73
 
 PUB Null
 '' This is not a top-level object

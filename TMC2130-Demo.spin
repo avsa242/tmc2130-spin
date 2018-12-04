@@ -45,6 +45,7 @@ PUB Main
 
 PUB GCONF
 
+    tmc.Diag1ActiveState (tmc#LOW)
     tmc.Diag0Stall (TRUE)
     tmc.Diag1Stall (TRUE)
     tmc.InvertShaftDir (FALSE)
@@ -53,6 +54,7 @@ PUB GCONF
     ser.Bin (tmc.GCONF, 32)
     time.Sleep (1)
 
+    tmc.Diag1ActiveState (tmc#HIGH)
     tmc.Diag0Stall (FALSE)
     tmc.Diag1Stall (FALSE)
     tmc.InvertShaftDir (TRUE)
@@ -87,7 +89,7 @@ DONE X.interpolate(1); // But generate intermediate steps
 DONE X.shaft_dir(1); // Invert direction to mimic original driver
 WIP  X.diag0_stall(1); // diag0 will pull low on stall
 WIP  X.diag1_stall(1); 
- X.diag1_active_high(1); // diag1 will pull high on stall
+WIP  X.diag1_active_high(1); // diag1 will pull high on stall
 WIP X.coolstep_min_speed(25000); // avoid false stall detection at low speeds
  X.sg_stall_value(14); // figured out by trial and error
  

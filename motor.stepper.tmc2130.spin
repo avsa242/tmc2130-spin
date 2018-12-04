@@ -12,6 +12,9 @@ CON
 ' Register addresses must be OR'd with $80 to signal intent to write
     WR_REG  = $80
 
+    LOW     = 0
+    HIGH    = 1
+
 VAR
 
     byte _spi_cog
@@ -89,6 +92,17 @@ PUB Diag1Stall(enabled) | tmp
     tmp |= enabled
     tmc_wrDataGram (core#REG_GCONF, tmp)
 
+PUB Diag1ActiveState(state) | tmp
+' Set active state of DIAG1 pin
+'   Valid values are HIGH/1 for push-pull, or LOW/0 for open-collector
+'   Any other value polls the chip and returns the current setting
+    case state
+        0, 1: state := state << core#FLD_DIAG1_PUSHPULL
+        OTHER:
+            return (tmc_rdDataGram(core#REG_GCONF) >> core#FLD_DIAG1_PUSHPULL & core#FLD_DIAG1_PUSHPULL_BITS) * TRUE
+    tmp := tmc_rdDataGram (core#REG_GCONF) & core#FLD_DIAG1_PUSHPULL_MASK
+    tmp |= state
+    tmc_wrDataGram (core#REG_GCONF, tmp)
 
 PUB GCONF
 
