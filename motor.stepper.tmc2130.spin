@@ -55,6 +55,31 @@ PUB ChopConf
 
     result := tmc_rdDataGram (core#REG_CHOPCONF) & $FF_FF_FF_FF
 
+PUB Diag0Stall(enabled) | tmp
+' Should DIAG0 pin be active when a motor stalls?
+'   Valid values are TRUE, 1 or FALSE
+'   Any other value polls the chip and returns the current setting
+    case ||enabled
+        0, 1: enabled := ||enabled << core#FLD_DIAG0_STALL
+        OTHER:
+            return (tmc_rdDataGram(core#REG_GCONF) >> core#FLD_DIAG0_STALL & core#FLD_DIAG0_STALL_BITS) * TRUE
+    tmp := tmc_rdDataGram (core#REG_GCONF) & core#FLD_DIAG0_STALL_MASK
+    tmp |= enabled
+    tmc_wrDataGram (core#REG_GCONF, tmp)
+
+PUB Diag1Stall(enabled) | tmp
+' Should DIAG1 pin be active when a motor stalls?
+'   Valid values are TRUE, 1 or FALSE
+'   Any other value polls the chip and returns the current setting
+    case ||enabled
+        0, 1: enabled := ||enabled << core#FLD_DIAG1_STALL
+        OTHER:
+            return (tmc_rdDataGram(core#REG_GCONF) >> core#FLD_DIAG1_STALL & core#FLD_DIAG1_STALL_BITS) * TRUE
+    tmp := tmc_rdDataGram (core#REG_GCONF) & core#FLD_DIAG1_STALL_MASK
+    tmp |= enabled
+    tmc_wrDataGram (core#REG_GCONF, tmp)
+
+
 PUB GCONF
 
     result := tmc_rdDataGram (core#REG_GCONF) & $FF_FF_FF_FF

@@ -16,6 +16,14 @@ CON
     CLKDELAY                = 1
 '' Register definitions
     REG_GCONF               = $00
+        FLD_DIAG1_STALL     = 8
+        FLD_DIAG1_STALL_BITS= %1
+        FLD_DIAG1_STALL_MASK= ($FF_FF_FF_FF - (FLD_DIAG1_STALL_BITS << FLD_DIAG1_STALL))
+
+        FLD_DIAG0_STALL     = 7
+        FLD_DIAG0_STALL_BITS= %1
+        FLD_DIAG0_STALL_MASK= ($FF_FF_FF_FF - (FLD_DIAG0_STALL_BITS << FLD_DIAG0_STALL))
+
         FLD_SHAFT           = 4
         FLD_SHAFT_BITS      = %1
         FLD_SHAFT_MASK      = ($FF_FF_FF_FF - (FLD_SHAFT_BITS << FLD_SHAFT))

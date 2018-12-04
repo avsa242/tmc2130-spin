@@ -45,12 +45,16 @@ PUB Main
 
 PUB GCONF
 
+    tmc.Diag0Stall (TRUE)
+    tmc.Diag1Stall (TRUE)
     tmc.InvertShaftDir (FALSE)
     ser.Position (0, 7)
     ser.Str (string("GCONF: "))
     ser.Bin (tmc.GCONF, 32)
     time.Sleep (1)
 
+    tmc.Diag0Stall (FALSE)
+    tmc.Diag1Stall (FALSE)
     tmc.InvertShaftDir (TRUE)
     ser.Position (0, 7)
     ser.Str (string("GCONF: "))
@@ -78,10 +82,10 @@ PUB ChopperCfg
 {
  X.begin(); // Init
  X.rms_current(500); // Current in mA
- X.microsteps(16); // Behave like the original Pololu A4988 driver
- X.interpolate(1); // But generate intermediate steps
- X.shaft_dir(1); // Invert direction to mimic original driver
- X.diag0_stall(1); // diag0 will pull low on stall
+DONE X.microsteps(16); // Behave like the original Pololu A4988 driver
+DONE X.interpolate(1); // But generate intermediate steps
+DONE X.shaft_dir(1); // Invert direction to mimic original driver
+WIP  X.diag0_stall(1); // diag0 will pull low on stall
  X.diag1_stall(1); 
  X.diag1_active_high(1); // diag1 will pull high on stall
  X.coolstep_min_speed(25000); // avoid false stall detection at low speeds
