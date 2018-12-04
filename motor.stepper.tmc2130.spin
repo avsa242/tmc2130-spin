@@ -55,6 +55,16 @@ PUB ChopConf
 
     result := tmc_rdDataGram (core#REG_CHOPCONF) & $FF_FF_FF_FF
 
+PUB CoolStepMin(threshold) | tmp
+' Set lower threshold velocity for switching on coolStep and stallGuard features
+'   Valid values are 0..1048576
+'   Any other value is ignored
+    case threshold
+        0..1048576: threshold &= core#REG_TCOOLTHRS_BITS
+        OTHER:
+            return
+    tmc_wrDataGram (core#REG_TCOOLTHRS, threshold)
+
 PUB Diag0Stall(enabled) | tmp
 ' Should DIAG0 pin be active when a motor stalls?
 '   Valid values are TRUE, 1 or FALSE

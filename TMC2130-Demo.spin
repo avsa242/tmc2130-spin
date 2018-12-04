@@ -86,9 +86,9 @@ DONE X.microsteps(16); // Behave like the original Pololu A4988 driver
 DONE X.interpolate(1); // But generate intermediate steps
 DONE X.shaft_dir(1); // Invert direction to mimic original driver
 WIP  X.diag0_stall(1); // diag0 will pull low on stall
- X.diag1_stall(1); 
+WIP  X.diag1_stall(1); 
  X.diag1_active_high(1); // diag1 will pull high on stall
- X.coolstep_min_speed(25000); // avoid false stall detection at low speeds
+WIP X.coolstep_min_speed(25000); // avoid false stall detection at low speeds
  X.sg_stall_value(14); // figured out by trial and error
  
  Y.begin();

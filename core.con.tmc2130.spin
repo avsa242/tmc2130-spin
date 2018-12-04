@@ -34,6 +34,7 @@ CON
     REG_TSTEP               = $12
     REG_TPWMTHRS            = $13
     REG_TCOOLTHRS           = $14
+        REG_TCOOLTHRS_BITS  = %1111_1111_1111_1111_1111
     REG_THIGH               = $15
 
 '' SPI MODE
