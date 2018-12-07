@@ -71,6 +71,10 @@ CON
         FLD_MRES_BITS           = %1111
         FLD_MRES_MASK           = ($FF_FF_FF_FF - (FLD_MRES_BITS << FLD_MRES))
     REG_COOLCONF                = $6D
+        FLD_SGT                 = 16
+        FLD_SGT_BITS            = %1111111
+        FLD_SGT_MASK            = ($FF_FF_FF_FF - (FLD_SGT_BITS << FLD_SGT))
+
     REG_DCCTRL                  = $6E
     REG_DRV_STATUS              = $6F
     REG_PWMCONF                 = $70

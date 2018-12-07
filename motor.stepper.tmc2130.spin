@@ -21,12 +21,15 @@ VAR
     byte _SDI, _SCK, _CS, _SDO
     byte _SS
 
-    byte _vsense
+' Variables needed for shadow registers
+'   (for those on the device that are write-only)
+    long _shreg_COOLCONF
 
 OBJ
 
     core    : "core.con.tmc2130"
     spi     : "SPI_Asm"
+    type    : "system.types"
 
 PUB Null
 ''This is not a top-level object
@@ -57,6 +60,10 @@ PUB ChipVersion | tmp
 PUB ChopConf
 
     result := tmc_rdDataGram (core#REG_CHOPCONF) & $FF_FF_FF_FF
+
+PUB COOLCONF
+
+    return _shreg_COOLCONF
 
 PUB CoolStepMin(threshold) | tmp
 ' Set lower threshold velocity for switching on coolStep and stallGuard features
@@ -166,6 +173,20 @@ PUB SPIMode
 PUB Status
 
     result := tmc_rdDataGram (core#REG_GSTAT)
+
+PUB StallThreshold(level)
+' Set stallGuard2 threshold level
+'   Valid values are -64 (most sensitive) to 63 (least sensitive)
+'   Any other value returns the current setting (*shadow register)
+    case level
+        -64..63:
+            level := (level & %111_1111) << core#FLD_SGT
+        OTHER:
+            return type.s7((_shreg_COOLCONF >> core#FLD_SGT) & core#FLD_SGT_BITS)
+
+    _shreg_COOLCONF &= core#FLD_SGT_MASK
+    _shreg_COOLCONF |= level
+    tmc_wrDataGram (core#REG_COOLCONF, _shreg_COOLCONF)
 
 PRI tmc_wrDataGram(reg, val) | i, dgram[2]
 

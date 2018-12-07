@@ -19,6 +19,7 @@ OBJ
     ser     : "com.serial.terminal"
     time    : "time"
     tmc     : "motor.stepper.tmc2130"
+    types   : "system.types"
 
 VAR
 
@@ -27,21 +28,37 @@ VAR
 PUB Main
 
     Setup
-        ser.Position (0, 3)
-        ser.Str (string("Chip version: "))
-        ser.Hex (tmc.ChipVersion, 2)
 
-        ser.Position (0, 4)
-        ser.Str (string("Status: "))
-        ser.Bin (tmc.Status, 3)
+    ser.Position (0, 3)
+    ser.Str (string("Chip version: "))
+    ser.Hex (tmc.ChipVersion, 2)
 
-        ser.Position (0, 5)
-        ser.Str (string("SPI Mode: "))
-        ser.Hex (tmc.SPIMode, 8)
+    ser.Position (0, 4)
+    ser.Str (string("Status: "))
+    ser.Bin (tmc.Status, 3)
+
+    ser.Position (0, 5)
+    ser.Str (string("SPI Mode: "))
+    ser.Hex (tmc.SPIMode, 8)
 
     repeat
-        GCONF
+        COOLCONF
+'        GCONF
 '        ChopperCfg
+
+PUB COOLCONF
+
+    tmc.StallThreshold (14)
+    ser.Position (0, 6)
+    ser.Str (string("COOLCONF: "))
+    ser.Bin (tmc.COOLCONF, 32)
+    time.Sleep (1)
+
+    tmc.StallThreshold (-60)
+    ser.Position (0, 6)
+    ser.Str (string("COOLCONF: "))
+    ser.Bin (tmc.COOLCONF, 32)
+    time.Sleep (1)
 
 PUB GCONF
 
