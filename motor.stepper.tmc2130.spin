@@ -24,6 +24,7 @@ VAR
 ' Variables needed for shadow registers
 '   (for those on the device that are write-only)
     long _shreg_COOLCONF
+    long _shreg_IHOLD_IRUN
 
 OBJ
 
@@ -59,13 +60,13 @@ PUB ChipVersion | tmp
 
 PUB ChopConf
 
-    result := tmc_rdDataGram (core#REG_CHOPCONF) & $FF_FF_FF_FF
+    result := tmc_rdDataGram (core#REG_CHOPCONF) & core#REG_CHOPCONF_MASK
 
 PUB COOLCONF
 
     return _shreg_COOLCONF
 
-PUB CoolStepMin(threshold) | tmp
+PUB CoolStepMin(threshold) | tmp'XXX add shadow reg for reading
 ' Set lower threshold velocity for switching on coolStep and stallGuard features
 '   Valid values are 0..1048576
 '   Any other value is ignored
@@ -84,7 +85,7 @@ PUB Diag0Stall(enabled) | tmp
         OTHER:
             return (tmc_rdDataGram(core#REG_GCONF) >> core#FLD_DIAG0_STALL & core#FLD_DIAG0_STALL_BITS) * TRUE
     tmp := tmc_rdDataGram (core#REG_GCONF) & core#FLD_DIAG0_STALL_MASK
-    tmp |= enabled
+    tmp := (tmp | enabled) & core#REG_GCONF_MASK
     tmc_wrDataGram (core#REG_GCONF, tmp)
 
 PUB Diag1Stall(enabled) | tmp
@@ -96,7 +97,7 @@ PUB Diag1Stall(enabled) | tmp
         OTHER:
             return (tmc_rdDataGram(core#REG_GCONF) >> core#FLD_DIAG1_STALL & core#FLD_DIAG1_STALL_BITS) * TRUE
     tmp := tmc_rdDataGram (core#REG_GCONF) & core#FLD_DIAG1_STALL_MASK
-    tmp |= enabled
+    tmp := (tmp | enabled) & core#REG_GCONF_MASK
     tmc_wrDataGram (core#REG_GCONF, tmp)
 
 PUB Diag1ActiveState(state) | tmp
@@ -108,12 +109,50 @@ PUB Diag1ActiveState(state) | tmp
         OTHER:
             return (tmc_rdDataGram(core#REG_GCONF) >> core#FLD_DIAG1_PUSHPULL & core#FLD_DIAG1_PUSHPULL_BITS) * TRUE
     tmp := tmc_rdDataGram (core#REG_GCONF) & core#FLD_DIAG1_PUSHPULL_MASK
-    tmp |= state
+    tmp := (tmp | state) & core#REG_GCONF_MASK
     tmc_wrDataGram (core#REG_GCONF, tmp)
+
+PUB DriveCurrent(mA, Rsense_mOhm) | CS
+' Set Driver current
+'   mA - Drive current in milliamperes
+'   Rsense_mOhm - Value of your driver board's sense resistor, in milliohms
+'   Example:
+'       mA = 500, Rsense = 0.11
+    CS := (32 * 1414 * mA / 1000 * (Rsense_mOhm + 20) / 325 - 1000) / 1000
+
+    case CS
+        0..15:
+            VSense (HIGH)
+            CS := (32 * 1414 * mA / 1000 * (Rsense_mOhm + 20) / 180 - 1000) / 1000
+        16..31:
+            VSense (LOW)
+        OTHER:
+            return
+
+    _shreg_IHOLD_IRUN &= core#FLD_IRUN_MASK
+    _shreg_IHOLD_IRUN |= (CS & core#FLD_IRUN_BITS) << core#FLD_IRUN
+
+    _shreg_IHOLD_IRUN &= core#FLD_IHOLD_MASK
+    _shreg_IHOLD_IRUN |= (CS/2 & core#FLD_IHOLD_BITS) << core#FLD_IHOLD
+
+    _shreg_IHOLD_IRUN &= core#REG_IHOLD_IRUN_MASK
+    tmc_wrDataGram (core#REG_IHOLD_IRUN, _shreg_IHOLD_IRUN)
+
+PUB RunCurrent
+
+    return (_shreg_IHOLD_IRUN >> core#FLD_IRUN) & core#FLD_IRUN_BITS
+
+PUB HoldCurrent
+
+    return (_shreg_IHOLD_IRUN >> core#FLD_IHOLD) & core#FLD_IHOLD_BITS
 
 PUB GCONF
 
-    result := tmc_rdDataGram (core#REG_GCONF) & $FF_FF_FF_FF
+    result := tmc_rdDataGram (core#REG_GCONF) & core#REG_GCONF_MASK
+
+PUB IHOLD_IRUN
+
+    result := _shreg_IHOLD_IRUN & core#REG_IHOLD_IRUN_MASK
     
 PUB Interpolate(enabled) | tmp
 ' Dis/Enable interpolation to 256 microsteps
@@ -124,7 +163,7 @@ PUB Interpolate(enabled) | tmp
         OTHER:
             return (tmc_rdDataGram(core#REG_CHOPCONF) >> core#FLD_INTPOL & core#FLD_INTPOL_BITS) * TRUE
     tmp := tmc_rdDataGram (core#REG_CHOPCONF) & core#FLD_INTPOL_MASK
-    tmp |= enabled
+    tmp := (tmp | enabled) & core#REG_CHOPCONF_MASK
     tmc_wrDataGram (core#REG_CHOPCONF, tmp)
 
 PUB InvertShaftDir(enabled) | tmp
@@ -136,7 +175,7 @@ PUB InvertShaftDir(enabled) | tmp
         OTHER:
             return (tmc_rdDataGram(core#REG_GCONF) >> core#FLD_SHAFT & core#FLD_SHAFT_BITS) * TRUE
     tmp := tmc_rdDataGram (core#REG_GCONF) & core#FLD_SHAFT_MASK
-    tmp |= enabled
+    tmp := (tmp | enabled) & core#REG_GCONF_MASK
     tmc_wrDataGram (core#REG_GCONF, tmp)
 
 PUB Microsteps(resolution) | tmp
@@ -151,7 +190,7 @@ PUB Microsteps(resolution) | tmp
             return result := lookupz(result: 256, 1, 2, 4, 8, 16, 32, 64, 128)
 
     tmp := tmc_rdDataGram (core#REG_CHOPCONF) & core#FLD_MRES_MASK
-    tmp |= resolution
+    tmp := (tmp | resolution) & core#REG_CHOPCONF_MASK
     tmc_wrDataGram (core#REG_CHOPCONF, tmp)
 
 PUB ShortProtect(enabled) | tmp
@@ -163,7 +202,7 @@ PUB ShortProtect(enabled) | tmp
         OTHER:
             return tmc_rdDataGram((core#REG_CHOPCONF >> core#FLD_DISS2G) & core#FLD_DISS2G_BITS) * TRUE
     tmp := tmc_rdDataGram (core#REG_CHOPCONF) & core#FLD_DISS2G_MASK
-    tmp |= enabled
+    tmp := (tmp | enabled) & core#REG_CHOPCONF_MASK
     tmc_wrDataGram (core#REG_CHOPCONF, tmp)
 
 PUB SPIMode
@@ -186,7 +225,22 @@ PUB StallThreshold(level)
 
     _shreg_COOLCONF &= core#FLD_SGT_MASK
     _shreg_COOLCONF |= level
+    _shreg_COOLCONF &= core#REG_COOLCONF_MASK
     tmc_wrDataGram (core#REG_COOLCONF, _shreg_COOLCONF)
+
+PUB VSense(sensitivity) | tmp
+' Set sensitivity of sense resistor voltage for use in current scaling
+'   Valid values are:
+'       0 or LOW - Low sensitivity, for higher sense resistor voltages
+'       1 or HIGH - High sensitivity, for lower sense resistor voltages
+'   Any other value returns the current setting
+    case sensitivity
+        0, 1: sensitivity := sensitivity << core#FLD_VSENSE
+        OTHER:
+            return tmc_rdDataGram((core#REG_CHOPCONF >> core#FLD_VSENSE) & core#FLD_VSENSE_BITS)
+    tmp := tmc_rdDataGram (core#REG_CHOPCONF) & core#FLD_VSENSE_MASK
+    tmp := (tmp | sensitivity) & core#REG_CHOPCONF_MASK
+    tmc_wrDataGram (core#REG_CHOPCONF, tmp)
 
 PRI tmc_wrDataGram(reg, val) | i, dgram[2]
 

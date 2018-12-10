@@ -16,6 +16,7 @@ CON
     CLKDELAY                    = 1
 '' Register definitions
     REG_GCONF                   = $00
+    REG_GCONF_MASK              = $1_FF_FF
         FLD_DIAG1_PUSHPULL      = 13
         FLD_DIAG1_PUSHPULL_BITS = %1
         FLD_DIAG1_PUSHPULL_MASK = ($FF_FF_FF_FF - (FLD_DIAG1_PUSHPULL_BITS << FLD_DIAG1_PUSHPULL))
@@ -34,6 +35,19 @@ CON
     REG_GSTAT                   = $01
     REG_IOIN                    = $04
     REG_IHOLD_IRUN              = $10
+    REG_IHOLD_IRUN_MASK         = $F_1F_1F
+        FLD_IHOLD               = 0
+        FLD_IHOLD_BITS          = %11111
+        FLD_IHOLD_MASK          = ($FF_FF_FF_FF - (FLD_IHOLD_BITS << FLD_IHOLD))
+
+        FLD_IRUN                = 8
+        FLD_IRUN_BITS           = %11111
+        FLD_IRUN_MASK           = ($FF_FF_FF_FF - (FLD_IRUN_BITS << FLD_IRUN))
+
+        FLD_IHOLDDELAY         = 16
+        FLD_IHOLDDELAY_BITS    = %1111
+        FLD_IHOLDDELAY_MASK    = ($FF_FF_FF_FF - (FLD_IHOLDDELAY_BITS << FLD_IRUN))
+
     REG_TPOWERDOWN              = $11
     REG_TSTEP                   = $12
     REG_TPWMTHRS                = $13
@@ -61,6 +75,7 @@ CON
     REG_MSCNT                   = $6A
     REG_MSCURACT                = $6B
     REG_CHOPCONF                = $6C
+    REG_CHOPCONF_MASK           = $7F_FF_FF_FF
         FLD_DISS2G              = 30
         FLD_DISS2G_BITS         = %1
         FLD_DISS2G_MASK         = ($FF_FF_FF_FF - (FLD_DISS2G_BITS << FLD_DISS2G))
@@ -70,7 +85,12 @@ CON
         FLD_MRES                = 24
         FLD_MRES_BITS           = %1111
         FLD_MRES_MASK           = ($FF_FF_FF_FF - (FLD_MRES_BITS << FLD_MRES))
+        FLD_VSENSE              = 17
+        FLD_VSENSE_BITS         = %1
+        FLD_VSENSE_MASK         = ($FF_FF_FF_FF - (FLD_VSENSE_BITS << FLD_VSENSE))
+
     REG_COOLCONF                = $6D
+    REG_COOLCONF_MASK           = $1_7F_EF_6F
         FLD_SGT                 = 16
         FLD_SGT_BITS            = %1111111
         FLD_SGT_MASK            = ($FF_FF_FF_FF - (FLD_SGT_BITS << FLD_SGT))

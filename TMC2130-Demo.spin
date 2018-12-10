@@ -9,9 +9,12 @@
 
 CON
 
-    _clkmode = cfg#_clkmode
-    _xinfreq = cfg#_xinfreq
+    _clkmode    = cfg#_clkmode
+    _xinfreq    = cfg#_xinfreq
     #16, SDI_PIN, SCK_PIN, CS_PIN, SDO_PIN
+
+    BITCOL      = 12
+    DELAY       = 500
 
 OBJ
 
@@ -43,22 +46,25 @@ PUB Main
 
     repeat
         COOLCONF
-'        GCONF
-'        ChopperCfg
+        GCONF
+        IHOLD_IRUN
+        CHOPCONF
 
 PUB COOLCONF
 
     tmc.StallThreshold (14)
-    ser.Position (0, 6)
+    ser.Position (0, 7)
     ser.Str (string("COOLCONF: "))
+    ser.Position (BITCOL, 7)
     ser.Bin (tmc.COOLCONF, 32)
-    time.Sleep (1)
+    time.MSleep(DELAY)
 
     tmc.StallThreshold (-60)
-    ser.Position (0, 6)
+    ser.Position (0, 7)
     ser.Str (string("COOLCONF: "))
+    ser.Position (BITCOL, 7)
     ser.Bin (tmc.COOLCONF, 32)
-    time.Sleep (1)
+    time.MSleep(DELAY)
 
 PUB GCONF
 
@@ -66,37 +72,55 @@ PUB GCONF
     tmc.Diag0Stall (TRUE)
     tmc.Diag1Stall (TRUE)
     tmc.InvertShaftDir (FALSE)
-    ser.Position (0, 7)
+    ser.Position (0, 8)
     ser.Str (string("GCONF: "))
+    ser.Position (BITCOL, 8)
     ser.Bin (tmc.GCONF, 32)
-    time.Sleep (1)
+    time.MSleep(DELAY)
 
     tmc.Diag1ActiveState (tmc#HIGH)
     tmc.Diag0Stall (FALSE)
     tmc.Diag1Stall (FALSE)
     tmc.InvertShaftDir (TRUE)
-    ser.Position (0, 7)
+    ser.Position (0, 8)
     ser.Str (string("GCONF: "))
+    ser.Position (BITCOL, 8)
     ser.Bin (tmc.GCONF, 32)
-    time.Sleep (1)
+    time.MSleep(DELAY)
 
-PUB ChopperCfg
+PUB IHOLD_IRUN
+
+    tmc.DriveCurrent (500, 100)
+    ser.Position (0, 9)
+    ser.Str (string("IHOLD_IRUN: "))
+    ser.Position (BITCOL, 9)
+    ser.Bin (tmc.IHOLD_IRUN, 32)
+    time.MSleep(DELAY)
+
+    tmc.DriveCurrent (1000, 100)
+    ser.Position (0, 9)
+    ser.Str (string("IHOLD_IRUN: "))
+    ser.Position (BITCOL, 9)
+    ser.Bin (tmc.IHOLD_IRUN, 32)
+    time.MSleep(DELAY)
+
+PUB CHOPCONF
 
     tmc.ShortProtect (TRUE)
 
     tmc.Interpolate (TRUE)
-    ser.Position (0, 8)
-    ser.Str (string("Chopper/driver cfg: "))
+    ser.Position (0, 10)
+    ser.Str (string("CHOPCONF: "))
+    ser.Position (BITCOL, 10)
     ser.bin (tmc.ChopConf, 32)
-
-    time.Sleep (1)
+    time.MSleep(DELAY)
 
     tmc.Interpolate (FALSE)
-    ser.Position (0, 8)
-    ser.Str (string("Chopper/driver cfg: "))
+    ser.Position (0, 10)
+    ser.Str (string("CHOPCONF: "))
+    ser.Position (BITCOL, 10)
     ser.bin (tmc.ChopConf, 32)
-
-    time.Sleep (1)
+    time.MSleep(DELAY)
 
 {
  X.begin(); // Init
@@ -108,7 +132,7 @@ WIP  X.diag0_stall(1); // diag0 will pull low on stall
 WIP  X.diag1_stall(1); 
 WIP  X.diag1_active_high(1); // diag1 will pull high on stall
 WIP X.coolstep_min_speed(25000); // avoid false stall detection at low speeds
- X.sg_stall_value(14); // figured out by trial and error
+WIP X.sg_stall_value(14); // figured out by trial and error
  
  Y.begin();
  Y.rms_current(1000);
