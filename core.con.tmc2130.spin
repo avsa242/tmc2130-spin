@@ -2,57 +2,67 @@
     --------------------------------------------
     Filename: core.con.tmc2130.spin
     Author: Jesse Burt
+    Description: Low-level constants
     Copyright (c) 2018
     Started: Dec 2, 2018
-    Updated: Dec 2, 2018
+    Updated: Mar 17, 2019
     See end of file for terms of use.
     --------------------------------------------
 }
 
 CON
 
+' SPI configuration
     CPOL                        = 1
     CPHS                        = 2
-    CLKDELAY                    = 1
-'' Register definitions
+    CLKDELAY                    = 10
+
+' Register definitions
     REG_GCONF                   = $00
-    REG_GCONF_MASK              = $1_FF_FF
+    REG_GCONF_MASK              = $00_01_FF_FF
         FLD_DIAG1_PUSHPULL      = 13
-        FLD_DIAG1_PUSHPULL_BITS = %1
-        FLD_DIAG1_PUSHPULL_MASK = ($FF_FF_FF_FF - (FLD_DIAG1_PUSHPULL_BITS << FLD_DIAG1_PUSHPULL))
+        BITS_DIAG1_PUSHPULL     = %1
+        MASK_DIAG1_PUSHPULL     = REG_GCONF_MASK ^ (BITS_DIAG1_PUSHPULL << FLD_DIAG1_PUSHPULL)
 
         FLD_DIAG1_STALL         = 8
-        FLD_DIAG1_STALL_BITS    = %1
-        FLD_DIAG1_STALL_MASK    = ($FF_FF_FF_FF - (FLD_DIAG1_STALL_BITS << FLD_DIAG1_STALL))
+        BITS_DIAG1_STALL        = %1
+        MASK_DIAG1_STALL        = REG_GCONF_MASK ^ (BITS_DIAG1_STALL << FLD_DIAG1_STALL)
 
         FLD_DIAG0_STALL         = 7
-        FLD_DIAG0_STALL_BITS    = %1
-        FLD_DIAG0_STALL_MASK    = ($FF_FF_FF_FF - (FLD_DIAG0_STALL_BITS << FLD_DIAG0_STALL))
+        BITS_DIAG0_STALL        = %1
+        MASK_DIAG0_STALL        = REG_GCONF_MASK ^ (BITS_DIAG0_STALL << FLD_DIAG0_STALL)
 
         FLD_SHAFT               = 4
-        FLD_SHAFT_BITS          = %1
-        FLD_SHAFT_MASK          = ($FF_FF_FF_FF - (FLD_SHAFT_BITS << FLD_SHAFT))
+        BITS_SHAFT              = %1
+        MASK_SHAFT              = REG_GCONF_MASK ^ (BITS_SHAFT << FLD_SHAFT)
+
     REG_GSTAT                   = $01
+
     REG_IOIN                    = $04
+    REG_IOIN_MASK               = $FF_00_00_7F
+        FLD_VERSION             = 24
+        BITS_VERSION            = %1111_1111
+        MASK_VERSION            = REG_IOIN_MASK ^ (BITS_VERSION << FLD_VERSION)
+
     REG_IHOLD_IRUN              = $10
     REG_IHOLD_IRUN_MASK         = $F_1F_1F
         FLD_IHOLD               = 0
-        FLD_IHOLD_BITS          = %11111
-        FLD_IHOLD_MASK          = ($FF_FF_FF_FF - (FLD_IHOLD_BITS << FLD_IHOLD))
+        BITS_IHOLD              = %11111
+        MASK_IHOLD              = REG_IHOLD_IRUN_MASK ^ (BITS_IHOLD << FLD_IHOLD)
 
         FLD_IRUN                = 8
-        FLD_IRUN_BITS           = %11111
-        FLD_IRUN_MASK           = ($FF_FF_FF_FF - (FLD_IRUN_BITS << FLD_IRUN))
+        BITS_IRUN               = %11111
+        MASK_IRUN               = REG_IHOLD_IRUN_MASK ^ (BITS_IRUN << FLD_IRUN)
 
-        FLD_IHOLDDELAY         = 16
-        FLD_IHOLDDELAY_BITS    = %1111
-        FLD_IHOLDDELAY_MASK    = ($FF_FF_FF_FF - (FLD_IHOLDDELAY_BITS << FLD_IRUN))
+        FLD_IHOLDDELAY          = 16
+        BITS_IHOLDDELAY         = %1111
+        MASK_IHOLDDELAY         = REG_IHOLD_IRUN_MASK ^ (BITS_IHOLDDELAY << FLD_IRUN)
 
     REG_TPOWERDOWN              = $11
     REG_TSTEP                   = $12
     REG_TPWMTHRS                = $13
     REG_TCOOLTHRS               = $14
-        REG_TCOOLTHRS_BITS      = %1111_1111_1111_1111_1111
+        BITS_TCOOLTHRS          = %1111_1111_1111_1111_1111
     REG_THIGH                   = $15
 
 '' SPI MODE
@@ -77,23 +87,23 @@ CON
     REG_CHOPCONF                = $6C
     REG_CHOPCONF_MASK           = $7F_FF_FF_FF
         FLD_DISS2G              = 30
-        FLD_DISS2G_BITS         = %1
-        FLD_DISS2G_MASK         = ($FF_FF_FF_FF - (FLD_DISS2G_BITS << FLD_DISS2G))
+        BITS_DISS2G             = %1
+        MASK_DISS2G             = REG_CHOPCONF_MASK ^ (BITS_DISS2G << FLD_DISS2G)
         FLD_INTPOL              = 28
-        FLD_INTPOL_BITS         = %1
-        FLD_INTPOL_MASK         = ($FF_FF_FF_FF - (FLD_INTPOL_BITS << FLD_INTPOL))
+        BITS_INTPOL             = %1
+        MASK_INTPOL             = REG_CHOPCONF_MASK ^ (BITS_INTPOL << FLD_INTPOL)
         FLD_MRES                = 24
-        FLD_MRES_BITS           = %1111
-        FLD_MRES_MASK           = ($FF_FF_FF_FF - (FLD_MRES_BITS << FLD_MRES))
+        BITS_MRES               = %1111
+        MASK_MRES               = REG_CHOPCONF_MASK ^ (BITS_MRES << FLD_MRES)
         FLD_VSENSE              = 17
-        FLD_VSENSE_BITS         = %1
-        FLD_VSENSE_MASK         = ($FF_FF_FF_FF - (FLD_VSENSE_BITS << FLD_VSENSE))
+        BITS_VSENSE             = %1
+        MASK_VSENSE             = REG_CHOPCONF_MASK ^ (BITS_VSENSE << FLD_VSENSE)
 
     REG_COOLCONF                = $6D
     REG_COOLCONF_MASK           = $1_7F_EF_6F
         FLD_SGT                 = 16
-        FLD_SGT_BITS            = %1111111
-        FLD_SGT_MASK            = ($FF_FF_FF_FF - (FLD_SGT_BITS << FLD_SGT))
+        BITS_SGT                = %1111111
+        MASK_SGT                = REG_COOLCONF_MASK ^ (BITS_SGT << FLD_SGT)
 
     REG_DCCTRL                  = $6E
     REG_DRV_STATUS              = $6F

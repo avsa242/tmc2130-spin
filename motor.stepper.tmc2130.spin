@@ -4,6 +4,8 @@
     Author: Jesse Burt
     Description: Driver for Trinamic TMC2130 stepper-motor driver IC
     Copyright (c) 2018
+    Started Dec 2, 2018
+    Updated Mar 17, 2019
     See end of file for terms of use.
     --------------------------------------------
 }
@@ -17,14 +19,15 @@ CON
 
 VAR
 
-    byte _spi_cog
-    byte _SDI, _SCK, _CS, _SDO
-    byte _SS
-
 ' Variables needed for shadow registers
 '   (for those on the device that are write-only)
     long _shreg_COOLCONF
     long _shreg_IHOLD_IRUN
+
+    byte _spi_cog
+    byte _SDI, _SCK, _CS, _SDO
+    byte _SS
+
 
 OBJ
 
@@ -55,12 +58,12 @@ PUB Stop
         dira[_CS] := 0
 
 PUB ChipVersion | tmp
+' Polls the chip and returns the version
+    result := (readRegX (core#REG_IOIN) >> 24) & $FF
 
-    result := (tmc_rdDataGram (core#REG_IOIN) >> 24) & $FF
+PUB CHOPCONF
 
-PUB ChopConf
-
-    result := tmc_rdDataGram (core#REG_CHOPCONF) & core#REG_CHOPCONF_MASK
+    result := readRegX (core#REG_CHOPCONF) & core#REG_CHOPCONF_MASK
 
 PUB COOLCONF
 
@@ -71,10 +74,10 @@ PUB CoolStepMin(threshold) | tmp'XXX add shadow reg for reading
 '   Valid values are 0..1048576
 '   Any other value is ignored
     case threshold
-        0..1048576: threshold &= core#REG_TCOOLTHRS_BITS
+        0..1048576: threshold &= core#BITS_TCOOLTHRS
         OTHER:
             return
-    tmc_wrDataGram (core#REG_TCOOLTHRS, threshold)
+    writeRegX (core#REG_TCOOLTHRS, threshold)
 
 PUB Diag0Stall(enabled) | tmp
 ' Should DIAG0 pin be active when a motor stalls?
@@ -83,10 +86,10 @@ PUB Diag0Stall(enabled) | tmp
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_DIAG0_STALL
         OTHER:
-            return (tmc_rdDataGram(core#REG_GCONF) >> core#FLD_DIAG0_STALL & core#FLD_DIAG0_STALL_BITS) * TRUE
-    tmp := tmc_rdDataGram (core#REG_GCONF) & core#FLD_DIAG0_STALL_MASK
+            return (readRegX(core#REG_GCONF) >> core#FLD_DIAG0_STALL & core#BITS_DIAG0_STALL) * TRUE
+    tmp := readRegX (core#REG_GCONF) & core#MASK_DIAG0_STALL
     tmp := (tmp | enabled) & core#REG_GCONF_MASK
-    tmc_wrDataGram (core#REG_GCONF, tmp)
+    writeRegX (core#REG_GCONF, tmp)
 
 PUB Diag1Stall(enabled) | tmp
 ' Should DIAG1 pin be active when a motor stalls?
@@ -95,10 +98,10 @@ PUB Diag1Stall(enabled) | tmp
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_DIAG1_STALL
         OTHER:
-            return (tmc_rdDataGram(core#REG_GCONF) >> core#FLD_DIAG1_STALL & core#FLD_DIAG1_STALL_BITS) * TRUE
-    tmp := tmc_rdDataGram (core#REG_GCONF) & core#FLD_DIAG1_STALL_MASK
+            return (readRegX(core#REG_GCONF) >> core#FLD_DIAG1_STALL & core#BITS_DIAG1_STALL) * TRUE
+    tmp := readRegX (core#REG_GCONF) & core#MASK_DIAG1_STALL
     tmp := (tmp | enabled) & core#REG_GCONF_MASK
-    tmc_wrDataGram (core#REG_GCONF, tmp)
+    writeRegX (core#REG_GCONF, tmp)
 
 PUB Diag1ActiveState(state) | tmp
 ' Set active state of DIAG1 pin
@@ -107,10 +110,10 @@ PUB Diag1ActiveState(state) | tmp
     case state
         0, 1: state := state << core#FLD_DIAG1_PUSHPULL
         OTHER:
-            return (tmc_rdDataGram(core#REG_GCONF) >> core#FLD_DIAG1_PUSHPULL & core#FLD_DIAG1_PUSHPULL_BITS) * TRUE
-    tmp := tmc_rdDataGram (core#REG_GCONF) & core#FLD_DIAG1_PUSHPULL_MASK
+            return (readRegX(core#REG_GCONF) >> core#FLD_DIAG1_PUSHPULL & core#BITS_DIAG1_PUSHPULL) * TRUE
+    tmp := readRegX (core#REG_GCONF) & core#MASK_DIAG1_PUSHPULL
     tmp := (tmp | state) & core#REG_GCONF_MASK
-    tmc_wrDataGram (core#REG_GCONF, tmp)
+    writeRegX (core#REG_GCONF, tmp)
 
 PUB DriveCurrent(mA, Rsense_mOhm) | CS
 ' Set Driver current
@@ -129,26 +132,26 @@ PUB DriveCurrent(mA, Rsense_mOhm) | CS
         OTHER:
             return
 
-    _shreg_IHOLD_IRUN &= core#FLD_IRUN_MASK
-    _shreg_IHOLD_IRUN |= (CS & core#FLD_IRUN_BITS) << core#FLD_IRUN
+    _shreg_IHOLD_IRUN &= core#MASK_IRUN
+    _shreg_IHOLD_IRUN |= (CS & core#BITS_IRUN) << core#FLD_IRUN
 
-    _shreg_IHOLD_IRUN &= core#FLD_IHOLD_MASK
-    _shreg_IHOLD_IRUN |= (CS/2 & core#FLD_IHOLD_BITS) << core#FLD_IHOLD
+    _shreg_IHOLD_IRUN &= core#MASK_IHOLD
+    _shreg_IHOLD_IRUN |= (CS/2 & core#BITS_IHOLD) << core#FLD_IHOLD
 
     _shreg_IHOLD_IRUN &= core#REG_IHOLD_IRUN_MASK
-    tmc_wrDataGram (core#REG_IHOLD_IRUN, _shreg_IHOLD_IRUN)
+    writeRegX (core#REG_IHOLD_IRUN, _shreg_IHOLD_IRUN)
 
 PUB RunCurrent
-
-    return (_shreg_IHOLD_IRUN >> core#FLD_IRUN) & core#FLD_IRUN_BITS
+' Returns the motor run current
+    return (_shreg_IHOLD_IRUN >> core#FLD_IRUN) & core#BITS_IRUN
 
 PUB HoldCurrent
-
-    return (_shreg_IHOLD_IRUN >> core#FLD_IHOLD) & core#FLD_IHOLD_BITS
+' Returns the motor standstill current
+    return (_shreg_IHOLD_IRUN >> core#FLD_IHOLD) & core#BITS_IHOLD
 
 PUB GCONF
 
-    result := tmc_rdDataGram (core#REG_GCONF) & core#REG_GCONF_MASK
+    result := readRegX (core#REG_GCONF) & core#REG_GCONF_MASK
 
 PUB IHOLD_IRUN
 
@@ -161,10 +164,10 @@ PUB Interpolate(enabled) | tmp
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_INTPOL
         OTHER:
-            return (tmc_rdDataGram(core#REG_CHOPCONF) >> core#FLD_INTPOL & core#FLD_INTPOL_BITS) * TRUE
-    tmp := tmc_rdDataGram (core#REG_CHOPCONF) & core#FLD_INTPOL_MASK
+            return (readRegX(core#REG_CHOPCONF) >> core#FLD_INTPOL & core#BITS_INTPOL) * TRUE
+    tmp := readRegX (core#REG_CHOPCONF) & core#MASK_INTPOL
     tmp := (tmp | enabled) & core#REG_CHOPCONF_MASK
-    tmc_wrDataGram (core#REG_CHOPCONF, tmp)
+    writeRegX (core#REG_CHOPCONF, tmp)
 
 PUB InvertShaftDir(enabled) | tmp
 ' Invert motor direction
@@ -173,10 +176,10 @@ PUB InvertShaftDir(enabled) | tmp
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_SHAFT
         OTHER:
-            return (tmc_rdDataGram(core#REG_GCONF) >> core#FLD_SHAFT & core#FLD_SHAFT_BITS) * TRUE
-    tmp := tmc_rdDataGram (core#REG_GCONF) & core#FLD_SHAFT_MASK
+            return (readRegX(core#REG_GCONF) >> core#FLD_SHAFT & core#BITS_SHAFT) * TRUE
+    tmp := readRegX (core#REG_GCONF) & core#MASK_SHAFT
     tmp := (tmp | enabled) & core#REG_GCONF_MASK
-    tmc_wrDataGram (core#REG_GCONF, tmp)
+    writeRegX (core#REG_GCONF, tmp)
 
 PUB Microsteps(resolution) | tmp
 ' Set micro-step resolution
@@ -186,12 +189,12 @@ PUB Microsteps(resolution) | tmp
         1, 2, 4, 8, 16, 32, 64, 128, 256:
             resolution := lookdownz(resolution: 256, 1, 2, 4, 8, 16, 32, 64, 128) << core#FLD_MRES
         OTHER:
-            result := (tmc_rdDataGram(core#REG_CHOPCONF) >> core#FLD_MRES) & core#FLD_MRES_BITS
+            result := (readRegX(core#REG_CHOPCONF) >> core#FLD_MRES) & core#BITS_MRES
             return result := lookupz(result: 256, 1, 2, 4, 8, 16, 32, 64, 128)
 
-    tmp := tmc_rdDataGram (core#REG_CHOPCONF) & core#FLD_MRES_MASK
+    tmp := readRegX (core#REG_CHOPCONF) & core#MASK_MRES
     tmp := (tmp | resolution) & core#REG_CHOPCONF_MASK
-    tmc_wrDataGram (core#REG_CHOPCONF, tmp)
+    writeRegX (core#REG_CHOPCONF, tmp)
 
 PUB ShortProtect(enabled) | tmp
 ' Short to GND protection
@@ -200,18 +203,18 @@ PUB ShortProtect(enabled) | tmp
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_DISS2G
         OTHER:
-            return tmc_rdDataGram((core#REG_CHOPCONF >> core#FLD_DISS2G) & core#FLD_DISS2G_BITS) * TRUE
-    tmp := tmc_rdDataGram (core#REG_CHOPCONF) & core#FLD_DISS2G_MASK
+            return readRegX((core#REG_CHOPCONF >> core#FLD_DISS2G) & core#BITS_DISS2G) * TRUE
+    tmp := readRegX (core#REG_CHOPCONF) & core#MASK_DISS2G
     tmp := (tmp | enabled) & core#REG_CHOPCONF_MASK
-    tmc_wrDataGram (core#REG_CHOPCONF, tmp)
+    writeRegX (core#REG_CHOPCONF, tmp)
 
 PUB SPIMode
 
-    result := (tmc_rdDataGram (core#REG_XDIRECT))
+    result := (readRegX (core#REG_XDIRECT))
 
 PUB Status
 
-    result := tmc_rdDataGram (core#REG_GSTAT)
+    result := readRegX (core#REG_GSTAT)
 
 PUB StallThreshold(level)
 ' Set stallGuard2 threshold level
@@ -221,12 +224,12 @@ PUB StallThreshold(level)
         -64..63:
             level := (level & %111_1111) << core#FLD_SGT
         OTHER:
-            return type.s7((_shreg_COOLCONF >> core#FLD_SGT) & core#FLD_SGT_BITS)
+            return type.s7((_shreg_COOLCONF >> core#FLD_SGT) & core#BITS_SGT)
 
-    _shreg_COOLCONF &= core#FLD_SGT_MASK
+    _shreg_COOLCONF &= core#MASK_SGT
     _shreg_COOLCONF |= level
     _shreg_COOLCONF &= core#REG_COOLCONF_MASK
-    tmc_wrDataGram (core#REG_COOLCONF, _shreg_COOLCONF)
+    writeRegX (core#REG_COOLCONF, _shreg_COOLCONF)
 
 PUB VSense(sensitivity) | tmp
 ' Set sensitivity of sense resistor voltage for use in current scaling
@@ -237,41 +240,40 @@ PUB VSense(sensitivity) | tmp
     case sensitivity
         0, 1: sensitivity := sensitivity << core#FLD_VSENSE
         OTHER:
-            return tmc_rdDataGram((core#REG_CHOPCONF >> core#FLD_VSENSE) & core#FLD_VSENSE_BITS)
-    tmp := tmc_rdDataGram (core#REG_CHOPCONF) & core#FLD_VSENSE_MASK
+            return readRegX((core#REG_CHOPCONF >> core#FLD_VSENSE) & core#BITS_VSENSE)
+    tmp := readRegX (core#REG_CHOPCONF) & core#MASK_VSENSE
     tmp := (tmp | sensitivity) & core#REG_CHOPCONF_MASK
-    tmc_wrDataGram (core#REG_CHOPCONF, tmp)
+    writeRegX (core#REG_CHOPCONF, tmp)
 
-PRI tmc_wrDataGram(reg, val) | i, dgram[2]
+PUB writeRegX(reg, val) | i, cmd_packet[2]
 
-    dgram.byte[4] := reg | WR_REG
-    dgram.long[0] := val
+    cmd_packet.long[0] := val
+    cmd_packet.byte[4] := reg | WR_REG
 
     outa[_CS] := 0
    
     repeat i from 4 to 0
-        spi.SHIFTOUT (_SDI, _SCK, spi#MSBFIRST, 8, dgram.byte[i])
+        spi.SHIFTOUT (_SDI, _SCK, spi#MSBFIRST, 8, cmd_packet.byte[i])
 
     outa[_CS] := 1
 
-PRI tmc_rdDataGram(reg) | i, tmp[2]
+PUB readRegX(reg) | i, cmd_packet[2]
 
-'    tmc_wrDataGram (reg, $00_00_00_00)
-    tmp.byte[4] := reg
-    tmp.long[0] := $00_00_00_00
+    cmd_packet.long[0] := $00_00_00_00
+    cmd_packet.byte[4] := reg
 
     outa[_CS] := 0
     repeat i from 4 to 0
-        spi.SHIFTOUT (_SDI, _SCK, spi#MSBFIRST, 8, tmp.byte[i])
+        spi.SHIFTOUT (_SDI, _SCK, spi#MSBFIRST, 8, cmd_packet.byte[i])
     outa[_CS] := 1
 
     outa[_CS] := 0
     repeat i from 4 to 0
-        tmp.byte[i] := spi.SHIFTIN (_SDO, _SCK, core#CPHS, 8)'Dpin, Cpin, Mode, Bits)
+        cmd_packet.byte[i] := spi.SHIFTIN (_SDO, _SCK, core#CPHS, 8)
     outa[_CS] := 1
 
-    _SS := tmp.byte[4]  'SPI Status
-    result := tmp & $FF_FF_FF_FF
+    _SS := cmd_packet.byte[4]  'SPI Status
+    result := cmd_packet & $FF_FF_FF_FF
 
 DAT
 {

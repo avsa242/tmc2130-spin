@@ -1,8 +1,11 @@
 {
     --------------------------------------------
-    Filename:
-    Author:
-    Copyright (c) 20__
+    Filename: TMC2130-Test.spin
+    Description: Test object for TMC2130 driver
+    Author: Jesse Burt
+    Copyright (c) 2019
+    Created Dec 2, 2018
+    Updated Mar 17, 2019
     See end of file for terms of use.
     --------------------------------------------
 }
@@ -18,7 +21,7 @@ CON
 
 OBJ
 
-    cfg     : "core.con.client.flip"
+    cfg     : "core.con.boardcfg.flip"
     ser     : "com.serial.terminal"
     time    : "time"
     tmc     : "motor.stepper.tmc2130"
@@ -122,6 +125,18 @@ PUB CHOPCONF
     ser.bin (tmc.ChopConf, 32)
     time.MSleep(DELAY)
 
+PUB EleksLaserA3Setup
+
+    tmc.Start (SDI_PIN, SCK_PIN, CS_PIN, SDO_PIN)
+    tmc.DriveCurrent (500, 110)
+    tmc.Microsteps (16)
+    tmc.Interpolate (TRUE)
+    tmc.InvertShaftDir (TRUE)
+    tmc.Diag0Stall (TRUE)
+    tmc.Diag1Stall (TRUE)
+    tmc.Diag1ActiveState (tmc#HIGH)
+    tmc.CoolStepMin (25000)
+    tmc.StallThreshold (14)
 {
  X.begin(); // Init
  X.rms_current(500); // Current in mA
@@ -129,11 +144,11 @@ DONE X.microsteps(16); // Behave like the original Pololu A4988 driver
 DONE X.interpolate(1); // But generate intermediate steps
 DONE X.shaft_dir(1); // Invert direction to mimic original driver
 WIP  X.diag0_stall(1); // diag0 will pull low on stall
-WIP  X.diag1_stall(1); 
+WIP  X.diag1_stall(1);
 WIP  X.diag1_active_high(1); // diag1 will pull high on stall
 WIP X.coolstep_min_speed(25000); // avoid false stall detection at low speeds
 WIP X.sg_stall_value(14); // figured out by trial and error
- 
+
  Y.begin();
  Y.rms_current(1000);
  Y.microsteps(16);
@@ -150,8 +165,14 @@ PUB Setup
     repeat until _ser_cog := ser.Start (115_200)
     ser.Clear
     ser.Str(string("Serial terminal started", ser#NL))
-    repeat until tmc.Start (SDI_PIN, SCK_PIN, CS_PIN, SDO_PIN)
-    ser.Str (string("TMC2130 driver started"))
+    if tmc.Start (SDI_PIN, SCK_PIN, CS_PIN, SDO_PIN)
+        ser.Str (string("TMC2130 driver started"))
+    else
+        ser.Str (string("TMC2130 driver failed to start - halting"))
+        tmc.Stop
+        time.MSleep (500)
+        ser.Stop
+        repeat
 
 DAT
 {
