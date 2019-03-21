@@ -5,7 +5,7 @@
     Description: Driver for Trinamic TMC2130 stepper-motor driver IC
     Copyright (c) 2018
     Started Dec 2, 2018
-    Updated Mar 17, 2019
+    Updated Mar 21, 2019
     See end of file for terms of use.
     --------------------------------------------
 }
@@ -23,6 +23,7 @@ VAR
 '   (for those on the device that are write-only)
     long _shreg_COOLCONF
     long _shreg_IHOLD_IRUN
+    long _shreg_TCOOLTHRS
 
     byte _spi_cog
     byte _SDI, _SCK, _CS, _SDO
@@ -61,22 +62,17 @@ PUB ChipVersion | tmp
 ' Polls the chip and returns the version
     result := (readRegX (core#REG_IOIN) >> 24) & $FF
 
-PUB CHOPCONF
-
-    result := readRegX (core#REG_CHOPCONF) & core#REG_CHOPCONF_MASK
-
-PUB COOLCONF
-
-    return _shreg_COOLCONF
-
-PUB CoolStepMin(threshold) | tmp'XXX add shadow reg for reading
+PUB CoolStepMin(threshold) | tmp
 ' Set lower threshold velocity for switching on coolStep and stallGuard features
 '   Valid values are 0..1048576
 '   Any other value is ignored
     case threshold
-        0..1048576: threshold &= core#BITS_TCOOLTHRS
+        0..1048576:
+            threshold &= core#BITS_TCOOLTHRS
+            _shreg_TCOOLTHRS := threshold
         OTHER:
-            return
+            return _shreg_TCOOLTHRS
+
     writeRegX (core#REG_TCOOLTHRS, threshold)
 
 PUB Diag0Stall(enabled) | tmp
@@ -153,14 +149,6 @@ PUB HoldCurrent
 ' Returns the motor standstill current
     return (_shreg_IHOLD_IRUN >> core#FLD_IHOLD) & core#BITS_IHOLD
 
-PUB GCONF
-
-    result := readRegX (core#REG_GCONF) & core#REG_GCONF_MASK
-
-PUB IHOLD_IRUN
-
-    result := _shreg_IHOLD_IRUN & core#REG_IHOLD_IRUN_MASK
-    
 PUB Interpolate(enabled) | tmp
 ' Dis/Enable interpolation to 256 microsteps
 '   Valid values are TRUE (-1 or 1) or FALSE

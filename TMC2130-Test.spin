@@ -5,7 +5,7 @@
     Author: Jesse Burt
     Copyright (c) 2019
     Created Dec 2, 2018
-    Updated Mar 17, 2019
+    Updated Mar 21, 2019
     See end of file for terms of use.
     --------------------------------------------
 }
@@ -16,8 +16,12 @@ CON
     _xinfreq    = cfg#_xinfreq
     #16, SDI_PIN, SCK_PIN, CS_PIN, SDO_PIN
 
-    BITCOL      = 12
     DELAY       = 500
+
+    COL_REG     = 0
+    COL_SET     = 12
+    COL_READ    = 24
+    COL_PF      = 40
 
 OBJ
 
@@ -47,83 +51,41 @@ PUB Main
     ser.Str (string("SPI Mode: "))
     ser.Hex (tmc.SPIMode, 8)
 
+    Test_CoolStepMin (1)
     repeat
-        COOLCONF
-        GCONF
-        IHOLD_IRUN
-        CHOPCONF
 
-PUB COOLCONF
+PUB Test_CoolStepMin(reps) | tmp, read
 
-    tmc.StallThreshold (14)
-    ser.Position (0, 7)
-    ser.Str (string("COOLCONF: "))
-    ser.Position (BITCOL, 7)
-    ser.Bin (tmc.COOLCONF, 32)
-    time.MSleep(DELAY)
+    repeat reps
+        repeat tmp from 0 to 1024
+            tmc.CoolStepMin (tmp)
+            read := tmc.CoolStepMin (-2)
+            ser.PositionY (7)
+            Message (string("CoolStepMin"), tmp, read)
 
-    tmc.StallThreshold (-60)
-    ser.Position (0, 7)
-    ser.Str (string("COOLCONF: "))
-    ser.Position (BITCOL, 7)
-    ser.Bin (tmc.COOLCONF, 32)
-    time.MSleep(DELAY)
+PUB Message(field, arg1, arg2)
 
-PUB GCONF
+    ser.PositionX (COL_REG)
+    ser.Str (field)
 
-    tmc.Diag1ActiveState (tmc#LOW)
-    tmc.Diag0Stall (TRUE)
-    tmc.Diag1Stall (TRUE)
-    tmc.InvertShaftDir (FALSE)
-    ser.Position (0, 8)
-    ser.Str (string("GCONF: "))
-    ser.Position (BITCOL, 8)
-    ser.Bin (tmc.GCONF, 32)
-    time.MSleep(DELAY)
+    ser.PositionX ( COL_SET)
+    ser.Str (string("SET: "))
+    ser.Dec (arg1)
 
-    tmc.Diag1ActiveState (tmc#HIGH)
-    tmc.Diag0Stall (FALSE)
-    tmc.Diag1Stall (FALSE)
-    tmc.InvertShaftDir (TRUE)
-    ser.Position (0, 8)
-    ser.Str (string("GCONF: "))
-    ser.Position (BITCOL, 8)
-    ser.Bin (tmc.GCONF, 32)
-    time.MSleep(DELAY)
+    ser.PositionX ( COL_READ)
+    ser.Str (string("   READ: "))
+    ser.Dec (arg2)
 
-PUB IHOLD_IRUN
+    ser.PositionX (COL_PF)
+    PassFail (arg1 == arg2)
+    ser.NewLine
 
-    tmc.DriveCurrent (500, 100)
-    ser.Position (0, 9)
-    ser.Str (string("IHOLD_IRUN: "))
-    ser.Position (BITCOL, 9)
-    ser.Bin (tmc.IHOLD_IRUN, 32)
-    time.MSleep(DELAY)
+PUB PassFail(num)
 
-    tmc.DriveCurrent (1000, 100)
-    ser.Position (0, 9)
-    ser.Str (string("IHOLD_IRUN: "))
-    ser.Position (BITCOL, 9)
-    ser.Bin (tmc.IHOLD_IRUN, 32)
-    time.MSleep(DELAY)
-
-PUB CHOPCONF
-
-    tmc.ShortProtect (TRUE)
-
-    tmc.Interpolate (TRUE)
-    ser.Position (0, 10)
-    ser.Str (string("CHOPCONF: "))
-    ser.Position (BITCOL, 10)
-    ser.bin (tmc.ChopConf, 32)
-    time.MSleep(DELAY)
-
-    tmc.Interpolate (FALSE)
-    ser.Position (0, 10)
-    ser.Str (string("CHOPCONF: "))
-    ser.Position (BITCOL, 10)
-    ser.bin (tmc.ChopConf, 32)
-    time.MSleep(DELAY)
+    case num
+        0: ser.Str (string("FAIL"))
+        -1: ser.Str (string("PASS"))
+        OTHER: ser.Str (string("???"))
 
 PUB Setup
 
