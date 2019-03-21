@@ -193,14 +193,15 @@ PUB Microsteps(resolution) | tmp
 ' Set micro-step resolution
 '   Valid values are 1, 2, 4, 8, 16, 32, 64, 128 or 256 (power-on default)
 '   Any other value polls the chip and returns the current setting
+    tmp := readRegX (core#REG_CHOPCONF) & core#MASK_MRES
     case resolution
         1, 2, 4, 8, 16, 32, 64, 128, 256:
             resolution := lookdownz(resolution: 256, 1, 2, 4, 8, 16, 32, 64, 128) << core#FLD_MRES
         OTHER:
-            result := (readRegX(core#REG_CHOPCONF) >> core#FLD_MRES) & core#BITS_MRES
+            result := (tmp >> core#FLD_MRES) & core#BITS_MRES
             return result := lookupz(result: 256, 1, 2, 4, 8, 16, 32, 64, 128)
 
-    tmp := readRegX (core#REG_CHOPCONF) & core#MASK_MRES
+    tmp &= core#MASK_MRES
     tmp := (tmp | resolution) & core#REG_CHOPCONF_MASK
     writeRegX (core#REG_CHOPCONF, tmp)
 
