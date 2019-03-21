@@ -81,7 +81,7 @@ PUB CoolStepMin(threshold) | tmp'XXX add shadow reg for reading
 
 PUB Diag0Stall(enabled) | tmp
 ' Should DIAG0 pin be active when a motor stalls?
-'   Valid values are TRUE, 1 or FALSE
+'   Valid values are TRUE (-1 or 1) or FALSE
 '   Any other value polls the chip and returns the current setting
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_DIAG0_STALL
@@ -93,7 +93,7 @@ PUB Diag0Stall(enabled) | tmp
 
 PUB Diag1Stall(enabled) | tmp
 ' Should DIAG1 pin be active when a motor stalls?
-'   Valid values are TRUE, 1 or FALSE
+'   Valid values are TRUE (-1 or 1) or FALSE
 '   Any other value polls the chip and returns the current setting
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_DIAG1_STALL
@@ -159,7 +159,7 @@ PUB IHOLD_IRUN
     
 PUB Interpolate(enabled) | tmp
 ' Dis/Enable interpolation to 256 microsteps
-'   Valid values are TRUE, 1 or FALSE
+'   Valid values are TRUE (-1 or 1) or FALSE
 '   Any other value polls the chip and returns the current setting
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_INTPOL
@@ -171,7 +171,7 @@ PUB Interpolate(enabled) | tmp
 
 PUB InvertShaftDir(enabled) | tmp
 ' Invert motor direction
-'   Valid values are TRUE, 1 or FALSE
+'   Valid values are TRUE (-1 or 1) or FALSE
 '   Any other value polls the chip and returns the current setting
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_SHAFT
@@ -198,7 +198,7 @@ PUB Microsteps(resolution) | tmp
 
 PUB ShortProtect(enabled) | tmp
 ' Short to GND protection
-'   Valid values are TRUE, 1 or FALSE
+'   Valid values are TRUE (-1 or 1) or FALSE
 '   Any other value polls the chip and returns the current setting
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_DISS2G
