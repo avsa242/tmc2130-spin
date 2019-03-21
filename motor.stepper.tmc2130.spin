@@ -65,7 +65,7 @@ PUB ChipVersion | tmp
 PUB CoolStepMin(threshold) | tmp
 ' Set lower threshold velocity for switching on coolStep and stallGuard features
 '   Valid values are 0..1048576
-'   Any other value is ignored
+'   Any other returns the current setting (*shadow register)
     case threshold
         0..1048576:
             threshold &= core#BITS_TCOOLTHRS
@@ -79,6 +79,7 @@ PUB Diag0Stall(enabled) | tmp
 ' Should DIAG0 pin be active when a motor stalls?
 '   Valid values are TRUE (-1 or 1) or FALSE
 '   Any other value polls the chip and returns the current setting
+'   NOTE: CoolStepMin should be called before using this method.
     tmp := readRegX (core#REG_GCONF)
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_DIAG0_STALL
@@ -93,6 +94,7 @@ PUB Diag1Stall(enabled) | tmp
 ' Should DIAG1 pin be active when a motor stalls?
 '   Valid values are TRUE (-1 or 1) or FALSE
 '   Any other value polls the chip and returns the current setting
+'   NOTE: CoolStepMin should be called before using this method.
     tmp := readRegX (core#REG_GCONF)
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_DIAG1_STALL
@@ -258,7 +260,7 @@ PUB writeRegX(reg, val) | i, cmd_packet[2]
 
     outa[_CS] := 1
 
-PUB readRegX(reg) | i, cmd_packet[2]
+PUB readRegX(reg) | i, cmd_packet[2], tmp
 
     cmd_packet.long[0] := $00_00_00_00
     cmd_packet.byte[4] := reg
@@ -270,11 +272,11 @@ PUB readRegX(reg) | i, cmd_packet[2]
 
     outa[_CS] := 0
     repeat i from 4 to 0
-        cmd_packet.byte[i] := spi.SHIFTIN (_SDO, _SCK, core#CPHS, 8)
+        tmp.byte[i] := spi.SHIFTIN (_SDO, _SCK, core#CPHS, 8)
     outa[_CS] := 1
 
-    _SS := cmd_packet.byte[4]  'SPI Status
-    result := cmd_packet & $FF_FF_FF_FF
+    _SS := tmp.byte[4]  'SPI Status
+    result := tmp & $FF_FF_FF_FF
 
 DAT
 {
