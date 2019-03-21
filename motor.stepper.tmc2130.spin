@@ -97,11 +97,12 @@ PUB Diag1Stall(enabled) | tmp
 ' Should DIAG1 pin be active when a motor stalls?
 '   Valid values are TRUE (-1 or 1) or FALSE
 '   Any other value polls the chip and returns the current setting
+    tmp := readRegX (core#REG_GCONF) & core#MASK_DIAG1_STALL
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_DIAG1_STALL
         OTHER:
-            return (readRegX(core#REG_GCONF) >> core#FLD_DIAG1_STALL & core#BITS_DIAG1_STALL) * TRUE
-    tmp := readRegX (core#REG_GCONF) & core#MASK_DIAG1_STALL
+            return ((tmp >> core#FLD_DIAG1_STALL) & core#BITS_DIAG1_STALL) * TRUE
+    tmp &= core#MASK_DIAG1_STALL
     tmp := (tmp | enabled) & core#REG_GCONF_MASK
     writeRegX (core#REG_GCONF, tmp)
 
