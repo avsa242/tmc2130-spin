@@ -179,11 +179,13 @@ PUB InvertShaftDir(enabled) | tmp
 ' Invert motor direction
 '   Valid values are TRUE (-1 or 1) or FALSE
 '   Any other value polls the chip and returns the current setting
+    tmp := readRegX (core#REG_GCONF) & core#MASK_SHAFT
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_SHAFT
         OTHER:
-            return (readRegX(core#REG_GCONF) >> core#FLD_SHAFT & core#BITS_SHAFT) * TRUE
-    tmp := readRegX (core#REG_GCONF) & core#MASK_SHAFT
+            return ((tmp >> core#FLD_SHAFT) & core#BITS_SHAFT) * TRUE
+
+    tmp &= core#MASK_SHAFT
     tmp := (tmp | enabled) & core#REG_GCONF_MASK
     writeRegX (core#REG_GCONF, tmp)
 
