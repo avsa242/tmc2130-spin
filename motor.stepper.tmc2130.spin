@@ -83,7 +83,7 @@ PUB Diag0Stall(enabled) | tmp
 ' Should DIAG0 pin be active when a motor stalls?
 '   Valid values are TRUE (-1 or 1) or FALSE
 '   Any other value polls the chip and returns the current setting
-    tmp := readRegX (core#REG_GCONF) & core#MASK_DIAG0_STALL
+    tmp := readRegX (core#REG_GCONF)
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_DIAG0_STALL
         OTHER:
@@ -97,7 +97,7 @@ PUB Diag1Stall(enabled) | tmp
 ' Should DIAG1 pin be active when a motor stalls?
 '   Valid values are TRUE (-1 or 1) or FALSE
 '   Any other value polls the chip and returns the current setting
-    tmp := readRegX (core#REG_GCONF) & core#MASK_DIAG1_STALL
+    tmp := readRegX (core#REG_GCONF)
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_DIAG1_STALL
         OTHER:
@@ -110,7 +110,7 @@ PUB Diag1ActiveState(state) | tmp
 ' Set active state of DIAG1 pin
 '   Valid values are HIGH/1 for push-pull, or LOW/0 for open-collector
 '   Any other value polls the chip and returns the current setting
-    tmp := readRegX (core#REG_GCONF) & core#MASK_DIAG1_PUSHPULL
+    tmp := readRegX (core#REG_GCONF)
     case state
         0, 1: state := state << core#FLD_DIAG1_PUSHPULL
         OTHER:
@@ -165,7 +165,7 @@ PUB Interpolate(enabled) | tmp
 ' Dis/Enable interpolation to 256 microsteps
 '   Valid values are TRUE (-1 or 1) or FALSE
 '   Any other value polls the chip and returns the current setting
-    tmp := readRegX (core#REG_CHOPCONF) & core#MASK_INTPOL
+    tmp := readRegX (core#REG_CHOPCONF)
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_INTPOL
         OTHER:
@@ -179,7 +179,7 @@ PUB InvertShaftDir(enabled) | tmp
 ' Invert motor direction
 '   Valid values are TRUE (-1 or 1) or FALSE
 '   Any other value polls the chip and returns the current setting
-    tmp := readRegX (core#REG_GCONF) & core#MASK_SHAFT
+    tmp := readRegX (core#REG_GCONF)
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_SHAFT
         OTHER:
@@ -193,7 +193,7 @@ PUB Microsteps(resolution) | tmp
 ' Set micro-step resolution
 '   Valid values are 1, 2, 4, 8, 16, 32, 64, 128 or 256 (power-on default)
 '   Any other value polls the chip and returns the current setting
-    tmp := readRegX (core#REG_CHOPCONF) & core#MASK_MRES
+    tmp := readRegX (core#REG_CHOPCONF)
     case resolution
         1, 2, 4, 8, 16, 32, 64, 128, 256:
             resolution := lookdownz(resolution: 256, 1, 2, 4, 8, 16, 32, 64, 128) << core#FLD_MRES
@@ -209,7 +209,7 @@ PUB ShortProtect(enabled) | tmp
 ' Short to GND protection
 '   Valid values are TRUE (-1 or 1) or FALSE
 '   Any other value polls the chip and returns the current setting
-    tmp := readRegX (core#REG_CHOPCONF) & core#MASK_DISS2G
+    tmp := readRegX (core#REG_CHOPCONF)
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_DISS2G
         OTHER:
@@ -248,11 +248,13 @@ PUB VSense(sensitivity) | tmp
 '       0 or LOW - Low sensitivity, for higher sense resistor voltages
 '       1 or HIGH - High sensitivity, for lower sense resistor voltages
 '   Any other value returns the current setting
+    tmp := readRegX (core#REG_CHOPCONF)
     case sensitivity
         0, 1: sensitivity := sensitivity << core#FLD_VSENSE
         OTHER:
-            return readRegX((core#REG_CHOPCONF >> core#FLD_VSENSE) & core#BITS_VSENSE)
-    tmp := readRegX (core#REG_CHOPCONF) & core#MASK_VSENSE
+            return ((tmp >> core#FLD_VSENSE) & core#BITS_VSENSE)
+
+    tmp &= core#MASK_VSENSE
     tmp := (tmp | sensitivity) & core#REG_CHOPCONF_MASK
     writeRegX (core#REG_CHOPCONF, tmp)
 
