@@ -110,11 +110,12 @@ PUB Diag1ActiveState(state) | tmp
 ' Set active state of DIAG1 pin
 '   Valid values are HIGH/1 for push-pull, or LOW/0 for open-collector
 '   Any other value polls the chip and returns the current setting
+    tmp := readRegX (core#REG_GCONF) & core#MASK_DIAG1_PUSHPULL
     case state
         0, 1: state := state << core#FLD_DIAG1_PUSHPULL
         OTHER:
-            return (readRegX(core#REG_GCONF) >> core#FLD_DIAG1_PUSHPULL & core#BITS_DIAG1_PUSHPULL) * TRUE
-    tmp := readRegX (core#REG_GCONF) & core#MASK_DIAG1_PUSHPULL
+            return ((tmp >> core#FLD_DIAG1_PUSHPULL) & core#BITS_DIAG1_PUSHPULL) * TRUE
+    tmp &= core#MASK_DIAG1_PUSHPULL
     tmp := (tmp | state) & core#REG_GCONF_MASK
     writeRegX (core#REG_GCONF, tmp)
 
@@ -123,7 +124,7 @@ PUB DriveCurrent(mA, Rsense_mOhm) | CS
 '   mA - Drive current in milliamperes
 '   Rsense_mOhm - Value of your driver board's sense resistor, in milliohms
 '   Example:
-'       mA = 500, Rsense = 0.11
+'       mA = 500, Rsense = 110 (for 0.11 Ohm)
     CS := (32 * 1414 * mA / 1000 * (Rsense_mOhm + 20) / 325 - 1000) / 1000
 
     case CS
@@ -164,11 +165,13 @@ PUB Interpolate(enabled) | tmp
 ' Dis/Enable interpolation to 256 microsteps
 '   Valid values are TRUE (-1 or 1) or FALSE
 '   Any other value polls the chip and returns the current setting
+    tmp := readRegX (core#REG_CHOPCONF) & core#MASK_INTPOL
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_INTPOL
         OTHER:
-            return (readRegX(core#REG_CHOPCONF) >> core#FLD_INTPOL & core#BITS_INTPOL) * TRUE
-    tmp := readRegX (core#REG_CHOPCONF) & core#MASK_INTPOL
+            return ((tmp >> core#FLD_INTPOL) & core#BITS_INTPOL) * TRUE
+
+    tmp &= core#MASK_INTPOL
     tmp := (tmp | enabled) & core#REG_CHOPCONF_MASK
     writeRegX (core#REG_CHOPCONF, tmp)
 
