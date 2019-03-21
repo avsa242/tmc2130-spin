@@ -209,11 +209,13 @@ PUB ShortProtect(enabled) | tmp
 ' Short to GND protection
 '   Valid values are TRUE (-1 or 1) or FALSE
 '   Any other value polls the chip and returns the current setting
+    tmp := readRegX (core#REG_CHOPCONF) & core#MASK_DISS2G
     case ||enabled
         0, 1: enabled := ||enabled << core#FLD_DISS2G
         OTHER:
-            return readRegX((core#REG_CHOPCONF >> core#FLD_DISS2G) & core#BITS_DISS2G) * TRUE
-    tmp := readRegX (core#REG_CHOPCONF) & core#MASK_DISS2G
+            return ((tmp >> core#FLD_DISS2G) & core#BITS_DISS2G) * TRUE
+
+    tmp &= core#MASK_DISS2G
     tmp := (tmp | enabled) & core#REG_CHOPCONF_MASK
     writeRegX (core#REG_CHOPCONF, tmp)
 
